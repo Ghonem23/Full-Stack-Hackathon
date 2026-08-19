@@ -1,0 +1,1019 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap");
+
+/* ================================================================
+   Global
+================================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: #f7f8fa;
+}
+
+/* ================================================================
+   Main Page
+================================================================ */
+
+.nm-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  font-family: "Inter", -apple-system, sans-serif;
+  background: #f7f8fa;
+}
+
+/* ================================================================
+   Left Visual
+================================================================ */
+
+.nm-visual {
+  position: relative;
+  flex: 1 1 52%;
+  min-height: 480px;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 32px 40px 40px;
+
+  background: linear-gradient(
+    150deg,
+    #0d375d 0%,
+    #046dd6 46%,
+    #0493ae 100%
+  );
+}
+
+/* Grid */
+
+.nm-grid {
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.07) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.07) 1px,
+      transparent 1px
+    );
+
+  background-size: 42px 42px;
+
+  mask-image: radial-gradient(
+    120% 100% at 30% 20%,
+    black 40%,
+    transparent 90%
+  );
+}
+
+/* Glow */
+
+.nm-glow {
+  position: absolute;
+
+  left: 50%;
+  top: 40%;
+
+  width: 420px;
+  height: 420px;
+
+  transform: translate(-50%, -50%);
+
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.16),
+    transparent 65%
+  );
+
+  filter: blur(4px);
+
+  animation: nm-glow-pulse 5s ease-in-out infinite;
+}
+
+@keyframes nm-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ================================================================
+   Logo
+================================================================ */
+
+.nm-logo {
+  position: relative;
+  z-index: 2;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 10px;
+
+  width: fit-content;
+}
+
+.nm-logo-icon {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 10px;
+
+  background: rgba(13, 55, 93, 0.55);
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #fff;
+}
+
+.nm-logo-word {
+  font-family: "Space Grotesk", sans-serif;
+
+  font-weight: 600;
+  font-size: 15.5px;
+
+  color: #fff;
+}
+
+/* ================================================================
+   Mascot
+================================================================ */
+
+.nm-mascot-wrap {
+  position: relative;
+  z-index: 2;
+
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 200px;
+}
+
+.nm-mascot {
+  width: 190px;
+  height: auto;
+
+  filter: drop-shadow(
+    0 18px 30px rgba(4, 20, 40, 0.35)
+  );
+}
+
+/* ================================================================
+   Visual Copy
+================================================================ */
+
+.nm-visual-copy {
+  position: relative;
+  z-index: 2;
+
+  max-width: 460px;
+
+  margin-top: 8px;
+}
+
+.nm-visual-title {
+  font-family: "Space Grotesk", sans-serif;
+
+  font-weight: 700;
+
+  font-size: clamp(24px, 3vw, 30px);
+
+  line-height: 1.2;
+
+  color: #ffffff;
+
+  margin: 0 0 12px;
+
+  letter-spacing: -0.01em;
+}
+
+.nm-visual-text {
+  font-size: 14.5px;
+
+  line-height: 1.6;
+
+  color: rgba(255, 255, 255, 0.82);
+
+  margin: 0;
+}
+
+/* ================================================================
+   ECG Wave
+================================================================ */
+
+.nm-wave {
+  position: relative;
+  z-index: 2;
+
+  width: 130px;
+  height: 26px;
+
+  margin-top: 18px;
+
+  opacity: 0.8;
+}
+
+/* ================================================================
+   Right Panel
+================================================================ */
+
+.nm-panel {
+  flex: 1 1 48%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 32px;
+}
+
+.nm-panel-inner {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ================================================================
+   Panel Header
+================================================================ */
+
+.nm-panel-head {
+  margin-bottom: 22px;
+}
+
+.nm-title {
+  font-family: "Space Grotesk", sans-serif;
+
+  font-size: 27px;
+
+  font-weight: 700;
+
+  color: #0d375d;
+
+  margin: 0 0 6px;
+
+  letter-spacing: -0.01em;
+}
+
+.nm-panel-subtitle {
+  font-size: 13.5px;
+
+  color: #0d375d;
+
+  opacity: 0.65;
+
+  margin: 0;
+
+  line-height: 1.5;
+}
+
+/* ================================================================
+   Card
+================================================================ */
+
+.nm-card {
+  width: 100%;
+
+  background: #ffffff;
+
+  border-radius: 20px;
+
+  border: 1px solid #e7eaef;
+
+  box-shadow:
+    0 1px 2px rgba(13, 55, 93, 0.04),
+    0 20px 44px -18px rgba(13, 55, 93, 0.16);
+
+  padding: 34px 32px;
+}
+
+/* ================================================================
+   Form
+================================================================ */
+
+.nm-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.nm-form-head {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 4px;
+
+  text-align: center;
+}
+
+.nm-subtitle {
+  font-size: 13.5px;
+
+  color: #0d375d;
+
+  opacity: 0.72;
+
+  margin: 0;
+
+  line-height: 1.5;
+}
+
+/* ================================================================
+   Fields
+================================================================ */
+
+.nm-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.nm-label {
+  font-size: 12.5px;
+
+  font-weight: 600;
+
+  color: #0d375d;
+}
+
+/* ================================================================
+   Inputs
+================================================================ */
+
+.nm-input-wrap {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  border: 1.5px solid #e3e7ed;
+
+  border-radius: 11px;
+
+  background: #fbfcfd;
+
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+.nm-input-wrap:focus-within {
+  border-color: #046dd6;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 0 0 3.5px rgba(4, 109, 214, 0.12);
+}
+
+.nm-input-wrap--error {
+  border-color: #5d0200;
+
+  background: #fff7f6;
+}
+
+.nm-input-wrap--error:focus-within {
+  box-shadow:
+    0 0 0 3.5px rgba(93, 2, 0, 0.1);
+}
+
+.nm-input-icon {
+  margin-left: 13px;
+
+  color: #93a0b4;
+
+  flex-shrink: 0;
+}
+
+.nm-input-wrap--error .nm-input-icon {
+  color: #5d0200;
+
+  opacity: 0.75;
+}
+
+.nm-input {
+  flex: 1;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  padding: 12px;
+
+  font-size: 14.5px;
+
+  color: #131116;
+
+  font-family: inherit;
+
+  min-width: 0;
+}
+
+.nm-input::placeholder {
+  color: #a9b2c0;
+}
+
+/* ================================================================
+   Password Eye Button
+================================================================ */
+
+.nm-eye-btn {
+  background: none;
+
+  border: none;
+
+  color: #93a0b4;
+
+  cursor: pointer;
+
+  padding: 8px 12px;
+
+  display: flex;
+  align-items: center;
+
+  transition: color 0.15s ease;
+}
+
+.nm-eye-btn:hover {
+  color: #0d375d;
+}
+
+/* ================================================================
+   Errors
+================================================================ */
+
+.nm-field-error {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  font-size: 12px;
+
+  color: #5d0200;
+
+  animation: nm-fade-in 0.18s ease;
+}
+
+.nm-banner {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 10px 13px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+
+  animation: nm-fade-in 0.2s ease;
+}
+
+.nm-banner--error {
+  background: #fdf1f0;
+
+  color: #5d0200;
+
+  border: 1px solid rgba(93, 2, 0, 0.14);
+}
+
+/* ================================================================
+   Remember / Forgot
+================================================================ */
+
+.nm-row-between {
+  display: flex;
+  align-items: center;
+
+  justify-content: space-between;
+}
+
+.nm-link-btn {
+  background: none;
+
+  border: none;
+
+  color: #046dd6;
+
+  font-size: 12.5px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  padding: 0;
+
+  transition: color 0.15s ease;
+}
+
+.nm-link-btn:hover {
+  color: #0493ae;
+
+  text-decoration: underline;
+}
+
+.nm-link-btn--strong {
+  font-size: 13.5px;
+}
+
+/* ================================================================
+   Checkbox
+================================================================ */
+
+.nm-checkbox {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+
+  user-select: none;
+}
+
+.nm-checkbox input {
+  position: absolute;
+
+  opacity: 0;
+
+  width: 0;
+  height: 0;
+}
+
+.nm-checkbox-box {
+  width: 16px;
+  height: 16px;
+
+  border-radius: 5px;
+
+  border: 1.5px solid #d4d9e1;
+
+  background: #fff;
+
+  flex-shrink: 0;
+
+  position: relative;
+
+  transition: all 0.15s ease;
+}
+
+.nm-checkbox input:checked + .nm-checkbox-box {
+  background: #046dd6;
+
+  border-color: #046dd6;
+}
+
+.nm-checkbox input:checked + .nm-checkbox-box::after {
+  content: "";
+
+  position: absolute;
+
+  left: 4.5px;
+  top: 1px;
+
+  width: 4px;
+  height: 8px;
+
+  border: solid white;
+
+  border-width: 0 1.6px 1.6px 0;
+
+  transform: rotate(45deg);
+}
+
+.nm-checkbox-label {
+  font-size: 12.5px;
+
+  color: #0d375d;
+
+  opacity: 0.85;
+}
+
+/* ================================================================
+   Submit Button
+================================================================ */
+
+.nm-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  border: none;
+
+  border-radius: 11px;
+
+  background: linear-gradient(
+    90deg,
+    #046dd6,
+    #0493ae
+  );
+
+  background-size: 140% 100%;
+
+  background-position: 0% 0%;
+
+  color: #fff;
+
+  font-size: 14.5px;
+
+  font-weight: 600;
+
+  padding: 13px 16px;
+
+  cursor: pointer;
+
+  margin-top: 4px;
+
+  transition:
+    background-position 0.35s ease,
+    transform 0.12s ease,
+    box-shadow 0.18s ease;
+
+  box-shadow:
+    0 10px 22px -10px rgba(4, 109, 214, 0.6);
+}
+
+.nm-submit:hover:not(:disabled) {
+  background-position: 100% 0%;
+
+  transform: translateY(-1px);
+}
+
+.nm-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.nm-submit:disabled {
+  opacity: 0.75;
+
+  cursor: progress;
+}
+
+/* ================================================================
+   Loading
+================================================================ */
+
+.nm-spin {
+  animation: nm-spin 0.8s linear infinite;
+}
+
+@keyframes nm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ================================================================
+   Demo Hint
+================================================================ */
+
+.nm-hint {
+  font-size: 11.5px;
+
+  color: #8b96a8;
+
+  text-align: center;
+
+  line-height: 1.5;
+
+  margin: 2px 0 0;
+}
+
+.nm-hint code {
+  background: #f0f2f5;
+
+  padding: 1px 5px;
+
+  border-radius: 4px;
+
+  color: #0d375d;
+
+  font-family: "JetBrains Mono", monospace;
+
+  font-size: 11px;
+}
+
+/* ================================================================
+   Sign Up
+================================================================ */
+
+.nm-switch {
+  text-align: center;
+
+  font-size: 13px;
+
+  color: #0d375d;
+
+  opacity: 0.85;
+
+  margin: 4px 0 0;
+}
+
+/* ================================================================
+   Back Button
+================================================================ */
+
+.nm-back-btn {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  background: none;
+
+  border: none;
+
+  color: #0d375d;
+
+  opacity: 0.7;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  padding: 0;
+
+  margin-bottom: 6px;
+
+  transition: opacity 0.15s ease;
+
+  width: fit-content;
+}
+
+.nm-back-btn:hover {
+  opacity: 1;
+
+  color: #046dd6;
+}
+
+/* ================================================================
+   Status States
+================================================================ */
+
+.nm-state {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  text-align: center;
+
+  gap: 6px;
+
+  padding: 10px 4px 6px;
+
+  animation: nm-fade-in 0.25s ease;
+}
+
+.nm-state-icon {
+  width: 52px;
+  height: 52px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 6px;
+}
+
+.nm-state-icon--success {
+  background: rgba(4, 147, 174, 0.1);
+
+  color: #0493ae;
+}
+
+.nm-state-icon--neutral {
+  background: rgba(4, 109, 214, 0.08);
+
+  color: #046dd6;
+
+  align-self: center;
+}
+
+.nm-state-title {
+  font-family: "Space Grotesk", sans-serif;
+
+  font-size: 20px;
+
+  font-weight: 600;
+
+  color: #131116;
+
+  margin: 0;
+}
+
+.nm-state-text {
+  font-size: 13.5px;
+
+  color: #0d375d;
+
+  opacity: 0.75;
+
+  margin: 0 0 10px;
+
+  max-width: 280px;
+
+  line-height: 1.55;
+}
+
+/* ================================================================
+   Secondary Button
+================================================================ */
+
+.nm-secondary-btn {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  background: #f2f4f7;
+
+  border: 1px solid #e3e7ed;
+
+  color: #0d375d;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  padding: 9px 16px;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  transition: background 0.15s ease;
+}
+
+.nm-secondary-btn:hover {
+  background: #e9ecf1;
+}
+
+/* ================================================================
+   Focus
+================================================================ */
+
+.nm-submit:focus-visible,
+.nm-eye-btn:focus-visible,
+.nm-link-btn:focus-visible,
+.nm-back-btn:focus-visible,
+.nm-secondary-btn:focus-visible {
+  outline: 2px solid #046dd6;
+
+  outline-offset: 2px;
+}
+
+/* ================================================================
+   Fade Animation
+================================================================ */
+
+@keyframes nm-fade-in {
+  from {
+    opacity: 0;
+
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+/* ================================================================
+   Responsive - Tablet
+================================================================ */
+
+@media (max-width: 900px) {
+  .nm-page {
+    flex-direction: column;
+  }
+
+  .nm-visual {
+    flex: none;
+
+    min-height: 380px;
+
+    padding: 26px 28px 30px;
+  }
+
+  .nm-mascot {
+    width: 140px;
+  }
+
+  .nm-visual-title {
+    font-size: 21px;
+  }
+
+  .nm-visual-text {
+    font-size: 13px;
+  }
+
+  .nm-panel {
+    padding: 28px 20px 48px;
+  }
+
+  .nm-title {
+    font-size: 23px;
+  }
+
+  .nm-card {
+    padding: 28px 22px;
+
+    border-radius: 16px;
+  }
+}
+
+/* ================================================================
+   Responsive - Mobile
+================================================================ */
+
+@media (max-width: 480px) {
+  .nm-visual {
+    min-height: 340px;
+
+    padding: 22px 22px 26px;
+  }
+
+  .nm-mascot {
+    width: 120px;
+  }
+
+  .nm-visual-title {
+    font-size: 19px;
+  }
+
+  .nm-card {
+    padding: 24px 18px;
+  }
+}
+
+/* ================================================================
+   Reduced Motion
+================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .nm-glow {
+    animation: none !important;
+  }
+
+  .nm-spin {
+    animation: none !important;
+  }
+
+  .nm-state,
+  .nm-field-error,
+  .nm-banner {
+    animation: none !important;
+  }
+}
+

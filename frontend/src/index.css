@@ -1,0 +1,151 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   Brand palette
+   The five source colours, kept under their original names so
+   they can be used in raw CSS too:
+     --color-1 #046DD6  --color-2 #0493AE  --color-3 #0D375D
+     --color-4 #5D0200  --color-5 #131116
+   Each one is expanded into a scale below so hover, focus and
+   disabled states stay on-brand instead of guessing.
+   ============================================================ */
+:root {
+  --color-1: #046dd6;
+  --color-2: #0493ae;
+  --color-3: #0d375d;
+  --color-4: #5d0200;
+  --color-5: #131116;
+}
+
+@theme {
+  /* Primary — clinical blue (--color-1) */
+  --color-primary-50: #eaf3fd;
+  --color-primary-100: #cfe4fa;
+  --color-primary-200: #9dc9f5;
+  --color-primary-300: #63a8ee;
+  --color-primary-400: #2b88e2;
+  --color-primary-500: #046dd6;
+  --color-primary-600: #0458ac;
+  --color-primary-700: #044584;
+
+  /* Teal — calm / vitals accent (--color-2) */
+  --color-teal-50: #e6f6f9;
+  --color-teal-100: #c2e9f0;
+  --color-teal-300: #45b8cd;
+  --color-teal-500: #0493ae;
+  --color-teal-600: #03768b;
+  --color-teal-700: #035a6a;
+
+  /* Navy — depth, headings, gradient anchor (--color-3) */
+  --color-navy-500: #0d375d;
+  --color-navy-600: #0a2c4a;
+  --color-navy-700: #082237;
+
+  /* Danger — validation errors only, used sparingly (--color-4) */
+  --color-danger-500: #5d0200;
+  --color-danger-600: #470200;
+
+  /* Ink — text ramp (--color-5) */
+  --color-ink-900: #131116;
+  --color-ink-700: #3a373f;
+  --color-ink-500: #6b6774;
+  --color-ink-400: #8b8794;
+  --color-ink-300: #a9a5b1;
+
+  /* Neutral surfaces — light, clinical, never flat white */
+  --color-surface-soft: #f5f8fc;
+  --color-surface-muted: #eef3f9;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --radius-card: 1.25rem;
+
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pulse-slow: pulse-slow 3.2s ease-in-out infinite;
+  --animate-float: float 5.5s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.06);
+  }
+}
+
+/* Draws the EKG trace on the brand panel */
+@keyframes ekg-sweep {
+  from {
+    stroke-dashoffset: 1200;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-surface-soft text-ink-900 font-sans antialiased;
+  }
+
+  /* Consistent, on-brand focus ring across every interactive element */
+  :focus-visible {
+    @apply outline-primary-500 outline-2 outline-offset-2;
+  }
+
+  /* Chrome autofill otherwise repaints inputs a hard yellow */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-ink-900);
+    -webkit-box-shadow: 0 0 0 1000px #fff inset;
+    caret-color: var(--color-ink-900);
+  }
+
+  /* Respect users who ask the OS to reduce motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility ekg-trace {
+  stroke-dasharray: 1200;
+  animation: ekg-sweep 6s linear infinite;
+}

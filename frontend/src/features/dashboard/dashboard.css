@@ -1,0 +1,1295 @@
+/* ================================================================
+   Dashboard styles.
+
+   Every selector here is prefixed `dsh-` and every rule is nested under
+   `.dsh-root`. Nothing in this file can reach the sign-up page or the login
+   screen, which is deliberate — those were written by other people and this
+   file is not allowed to move them.
+
+   Colours match the brand tokens already declared in styles/index.css; they
+   are repeated as local custom properties so this stylesheet stands on its own
+   and does not depend on Tailwind's theme being loaded first.
+   ================================================================ */
+
+.dsh-root {
+  --dsh-blue: #046dd6;
+  --dsh-teal: #0493ae;
+  --dsh-navy: #0d375d;
+
+  --dsh-ink: #131116;
+  --dsh-ink-2: #3a373f;
+  --dsh-muted: #6b6774;
+
+  --dsh-surface: #ffffff;
+  --dsh-plane: #f5f8fc;
+  --dsh-border: #e2e8f0;
+  --dsh-grid: #e8edf3;
+
+  --dsh-radius: 16px;
+  --dsh-shadow: 0 1px 2px rgba(13, 55, 93, 0.06), 0 8px 24px rgba(13, 55, 93, 0.05);
+
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--dsh-plane);
+  color: var(--dsh-ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.dsh-root *,
+.dsh-root *::before,
+.dsh-root *::after {
+  box-sizing: border-box;
+}
+
+.dsh-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ================================================================
+   Sidebar
+   ================================================================ */
+
+.dsh-side {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 232px;
+  flex-shrink: 0;
+  height: 100vh;
+  padding: 24px 16px;
+  background: linear-gradient(168deg, #0d375d 0%, #04437f 58%, #046dd6 100%);
+  color: #fff;
+}
+
+.dsh-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
+}
+
+.dsh-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.dsh-brand-word {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.dsh-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dsh-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.74);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.dsh-nav-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.dsh-nav-link.is-active {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-weight: 600;
+}
+
+.dsh-side-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+  padding: 11px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+
+.dsh-side-cta:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ================================================================
+   Main column
+   ================================================================ */
+
+.dsh-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.dsh-top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--dsh-border);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+}
+
+.dsh-top-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--dsh-navy);
+}
+
+.dsh-top-sub {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--dsh-muted);
+}
+
+.dsh-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* The run picker scopes every panel at once, which is why it lives up here
+   rather than inside any single card. */
+.dsh-select select {
+  padding: 8px 12px;
+  border: 1px solid var(--dsh-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--dsh-ink-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dsh-select select:focus-visible {
+  outline: 2px solid var(--dsh-blue);
+  outline-offset: 2px;
+}
+
+.dsh-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--dsh-blue);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.dsh-ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border: 1px solid var(--dsh-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--dsh-ink-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.16s ease, color 0.16s ease;
+}
+
+.dsh-ghost-btn:hover {
+  border-color: #bcccdc;
+  color: var(--dsh-ink);
+}
+
+.dsh-scroll {
+  flex: 1;
+  padding: 28px 32px 56px;
+}
+
+/* ================================================================
+   Sections
+   ================================================================ */
+
+.dsh-section {
+  margin-bottom: 40px;
+  scroll-margin-top: 88px;
+}
+
+.dsh-section-head {
+  margin-bottom: 16px;
+}
+
+.dsh-eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--dsh-teal);
+}
+
+.dsh-section-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--dsh-navy);
+}
+
+.dsh-section-note {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: var(--dsh-muted);
+}
+
+.dsh-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+/* ================================================================
+   Stat tiles
+   ================================================================ */
+
+.dsh-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.dsh-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 1px solid var(--dsh-border);
+  border-radius: var(--dsh-radius);
+  background: var(--dsh-surface);
+  box-shadow: var(--dsh-shadow);
+}
+
+.dsh-kpi--hero {
+  background: linear-gradient(150deg, #0d375d 0%, #04437f 62%, #046dd6 100%);
+  border-color: transparent;
+  color: #fff;
+}
+
+.dsh-kpi-label {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--dsh-muted);
+}
+
+.dsh-kpi--hero .dsh-kpi-label {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.dsh-kpi-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Proportional figures on purpose — tabular-nums makes a big number look
+   loose at display sizes. Tabular is reserved for the table views. */
+.dsh-kpi-value {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--dsh-navy);
+}
+
+.dsh-kpi--hero .dsh-kpi-value {
+  font-size: 50px;
+  color: #fff;
+}
+
+.dsh-spark {
+  flex-shrink: 0;
+  margin-bottom: 3px;
+}
+
+.dsh-kpi--hero .dsh-spark {
+  display: none;
+}
+
+.dsh-kpi-delta {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.dsh-kpi-caption {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--dsh-muted);
+}
+
+.dsh-kpi--hero .dsh-kpi-caption {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ================================================================
+   Chart cards
+   ================================================================ */
+
+.dsh-card {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--dsh-border);
+  border-radius: var(--dsh-radius);
+  background: var(--dsh-surface);
+  box-shadow: var(--dsh-shadow);
+  min-width: 0;
+}
+
+.dsh-card--span-2 {
+  grid-column: span 2;
+}
+
+.dsh-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.dsh-card-title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: var(--dsh-navy);
+}
+
+.dsh-card-sub {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--dsh-muted);
+}
+
+.dsh-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.dsh-card-foot {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--dsh-grid);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--dsh-muted);
+}
+
+.dsh-toggle {
+  display: flex;
+  flex-shrink: 0;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--dsh-plane);
+}
+
+.dsh-toggle button {
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--dsh-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dsh-toggle button.is-active {
+  background: #fff;
+  color: var(--dsh-navy);
+  box-shadow: 0 1px 2px rgba(13, 55, 93, 0.12);
+}
+
+/* Legend text stays in ink — a light series colour is illegible as text.
+   Identity comes from the swatch beside it. */
+.dsh-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.dsh-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dsh-ink-2);
+}
+
+.dsh-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.dsh-swatch--line {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+/* ================================================================
+   Plot area
+   ================================================================ */
+
+.dsh-plot {
+  position: relative;
+  width: 100%;
+  /* Stops mobile browsers waiting ~300ms for a double-tap before delivering
+     the touch that opens a tooltip. */
+  touch-action: manipulation;
+}
+
+/* Marks are reachable by Tab. The ring only appears for keyboard focus, so
+   mouse users never see it. */
+.dsh-plot [tabindex]:focus-visible,
+.dsh-funnel li:focus-visible {
+  outline: 2px solid var(--dsh-blue);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.dsh-plot [tabindex] {
+  cursor: pointer;
+}
+
+.dsh-funnel li {
+  border-radius: 8px;
+}
+
+.dsh-plot--center {
+  display: flex;
+  justify-content: center;
+}
+
+.dsh-plot svg {
+  display: block;
+  overflow: visible;
+}
+
+.dsh-plot path,
+.dsh-plot rect,
+.dsh-plot circle {
+  transition: opacity 0.12s ease;
+}
+
+.dsh-axis-text {
+  font-size: 11px;
+  font-weight: 500;
+  fill: #6b6774;
+  font-variant-numeric: tabular-nums;
+}
+
+.dsh-axis-title {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #8b8794;
+}
+
+.dsh-point-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  fill: #3a373f;
+  font-variant-numeric: tabular-nums;
+}
+
+.dsh-rule-label {
+  font-size: 11px;
+  font-weight: 700;
+  fill: #3a373f;
+}
+
+.dsh-donut-value {
+  font-size: 26px;
+  font-weight: 700;
+  fill: #0d375d;
+}
+
+.dsh-donut-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  fill: #6b6774;
+}
+
+.dsh-multiples {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.dsh-multiple-title {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dsh-ink-2);
+}
+
+/* ================================================================
+   Tooltip
+   ================================================================ */
+
+.dsh-tooltip {
+  position: absolute;
+  z-index: 20;
+  min-width: 128px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: #131116;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.45;
+  pointer-events: none;
+  box-shadow: 0 6px 20px rgba(19, 17, 22, 0.28);
+}
+
+.dsh-tooltip strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dsh-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.dsh-tip-row b {
+  margin-left: auto;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================================
+   Table view — the colour-free twin every panel carries
+   ================================================================ */
+
+.dsh-table-wrap {
+  overflow-x: auto;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.dsh-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dsh-table th,
+.dsh-table td {
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--dsh-grid);
+  white-space: nowrap;
+}
+
+.dsh-table thead th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  color: var(--dsh-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dsh-table th:first-child,
+.dsh-table thead th:first-child {
+  text-align: left;
+  color: var(--dsh-ink-2);
+  font-weight: 600;
+}
+
+.dsh-table tbody th {
+  font-weight: 600;
+  white-space: normal;
+}
+
+/* ================================================================
+   Funnel
+   ================================================================ */
+
+.dsh-funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: stage;
+}
+
+.dsh-funnel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+
+.dsh-funnel-stage {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--dsh-ink-2);
+}
+
+.dsh-funnel-value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--dsh-navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.dsh-funnel-share {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--dsh-muted);
+}
+
+/* The unfilled track is a lighter step of the fill's own ramp, so the stage
+   reads across the whole bar rather than only where it is filled. */
+.dsh-funnel-track {
+  height: 10px;
+  border-radius: 5px;
+  background: #e7effa;
+  overflow: hidden;
+}
+
+.dsh-funnel-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dsh-funnel-drop {
+  margin: 5px 0 0;
+  font-size: 11.5px;
+  color: var(--dsh-muted);
+}
+
+/* ================================================================
+   Evidence panel
+   ================================================================ */
+
+.dsh-evidence-query {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 11px 13px;
+  border-radius: 11px;
+  background: var(--dsh-plane);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--dsh-ink-2);
+}
+
+.dsh-evidence-query-label {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dsh-teal);
+}
+
+.dsh-evidence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.dsh-evidence-item {
+  padding: 13px 14px;
+  border: 1px solid var(--dsh-border);
+  border-radius: 12px;
+}
+
+.dsh-evidence-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.dsh-rank {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--dsh-plane);
+  color: var(--dsh-navy);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dsh-evidence-cite {
+  flex: 1;
+  min-width: 0;
+}
+
+.dsh-evidence-doc {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--dsh-navy);
+}
+
+.dsh-evidence-meta {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: var(--dsh-muted);
+}
+
+.dsh-evidence-meta code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--dsh-plane);
+  font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+}
+
+.dsh-score {
+  flex-shrink: 0;
+  width: 92px;
+  text-align: right;
+}
+
+.dsh-score-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dsh-navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.dsh-score-track {
+  display: block;
+  height: 5px;
+  margin-top: 5px;
+  border-radius: 3px;
+  background: #e7effa;
+  overflow: hidden;
+}
+
+.dsh-score-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+}
+
+.dsh-evidence-excerpt {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--dsh-ink-2);
+}
+
+/* Status never rests on colour alone — every chip carries a glyph and a word. */
+.dsh-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.dsh-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dsh-chip.is-good {
+  background: #e7f6e7;
+  color: #146c14;
+}
+
+.dsh-chip.is-warn {
+  background: #fdeee6;
+  color: #9a4418;
+}
+
+/* ================================================================
+   Live panel
+   ================================================================ */
+
+.dsh-live-bar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 10px;
+}
+
+.dsh-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.dsh-live-dot.is-live {
+  background: #0ca30c;
+  animation: dsh-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes dsh-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(12, 163, 12, 0.35);
+  }
+  50% {
+    opacity: 0.72;
+    box-shadow: 0 0 0 5px rgba(12, 163, 12, 0);
+  }
+}
+
+.dsh-live-text {
+  font-size: 12.5px;
+  color: var(--dsh-muted);
+}
+
+.dsh-live-text b {
+  color: var(--dsh-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.dsh-live-bar .dsh-ghost-btn {
+  margin-left: auto;
+  padding: 5px 11px;
+  font-size: 12px;
+}
+
+.dsh-disclaimer {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--dsh-border);
+  border-left: 3px solid var(--dsh-teal);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--dsh-muted);
+}
+
+/* ================================================================
+   Responsive — cards drop to one column before their labels collide
+   ================================================================ */
+
+@media (max-width: 1280px) {
+  .dsh-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1080px) {
+  .dsh-grid,
+  .dsh-multiples {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dsh-card--span-2 {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 860px) {
+  .dsh-side {
+    position: static;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    overflow-x: auto;
+  }
+
+  .dsh-root {
+    flex-direction: column;
+  }
+
+  .dsh-nav {
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  .dsh-side-cta {
+    margin-top: 0;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .dsh-scroll,
+  .dsh-top {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .dsh-kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dsh-root *,
+  .dsh-root *::before,
+  .dsh-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ============================================================
+   Cohort section — the filter bar and the three chart forms
+   that only this section uses.
+   ============================================================ */
+
+.dsh-cohort-status {
+  margin: 0;
+  padding: 28px 4px;
+  font-size: 13.5px;
+  color: var(--dsh-muted);
+  text-align: center;
+}
+
+.dsh-cohort-status--error {
+  color: #a12b2b;
+}
+
+.dsh-cohort-status code {
+  font-size: 12.5px;
+  color: var(--dsh-ink-2);
+}
+
+/* --- filter bar --- */
+
+.dsh-filters {
+  background: var(--dsh-surface);
+  border: 1px solid var(--dsh-border);
+  border-radius: var(--dsh-radius);
+  box-shadow: var(--dsh-shadow);
+  padding: 18px 20px 20px;
+  margin-bottom: 18px;
+}
+
+.dsh-filters-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--dsh-border);
+}
+
+.dsh-filters-count {
+  margin: 0;
+  font-size: 14px;
+  color: var(--dsh-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.dsh-filters-count strong {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--dsh-ink);
+  margin-right: 2px;
+}
+
+.dsh-filters-share {
+  color: var(--dsh-muted);
+}
+
+.dsh-filters-note {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--dsh-muted);
+}
+
+.dsh-filter-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px 22px;
+}
+
+.dsh-filter-group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.dsh-filter-legend {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dsh-muted);
+}
+
+.dsh-filter-value {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dsh-blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.dsh-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dsh-chip {
+  border: 1px solid var(--dsh-border);
+  background: var(--dsh-plane);
+  color: var(--dsh-ink-2);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+
+.dsh-chip:hover {
+  border-color: #b9cbe0;
+  background: #eef4fb;
+}
+
+/* Selected state carries colour *and* weight change, so it survives a
+   greyscale print and a forced-colours mode. */
+.dsh-chip.is-on {
+  background: var(--dsh-blue);
+  border-color: var(--dsh-blue);
+  color: #fff;
+}
+
+.dsh-chip:focus-visible {
+  outline: 2px solid var(--dsh-blue);
+  outline-offset: 2px;
+}
+
+/* --- dual range --- */
+
+.dsh-range {
+  position: relative;
+  height: 26px;
+  display: flex;
+  align-items: center;
+}
+
+.dsh-range-track,
+.dsh-range-fill {
+  position: absolute;
+  height: 4px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.dsh-range-track {
+  left: 0;
+  right: 0;
+  background: #dce5ef;
+}
+
+.dsh-range-fill {
+  background: var(--dsh-blue);
+}
+
+/* Both inputs sit on the same line; only their thumbs take the pointer, so
+   the lower handle stays grabbable everywhere the upper one is not. */
+.dsh-range input[type='range'] {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  background: none;
+  pointer-events: none;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 26px;
+}
+
+.dsh-range input[type='range']::-webkit-slider-thumb {
+  pointer-events: auto;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--dsh-blue);
+  box-shadow: 0 1px 3px rgba(13, 55, 93, 0.25);
+  cursor: grab;
+}
+
+.dsh-range input[type='range']::-moz-range-thumb {
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--dsh-blue);
+  box-shadow: 0 1px 3px rgba(13, 55, 93, 0.25);
+  cursor: grab;
+}
+
+.dsh-range input[type='range']::-moz-range-track {
+  background: none;
+}
+
+.dsh-range input[type='range']:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--dsh-blue);
+  outline-offset: 2px;
+}
+
+.dsh-range input[type='range']:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--dsh-blue);
+  outline-offset: 2px;
+}
+
+/* --- clickable marks --- */
+
+.dsh-box,
+.dsh-heat-cell {
+  transition: opacity 0.14s ease;
+}
+
+.dsh-box.is-pickable,
+.dsh-heat-cell.is-pickable {
+  cursor: pointer;
+}
+
+/* Unselected bands fade rather than disappear: the comparison is the point,
+   so the other bands have to stay readable next to the chosen one. */
+.dsh-box.is-dimmed,
+.dsh-heat-cell.is-dimmed {
+  opacity: 0.38;
+}
+
+.dsh-box:focus-visible,
+.dsh-heat-cell:focus-visible {
+  outline: 2px solid var(--dsh-blue);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.dsh-heat-value {
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .dsh-filters-head {
+    flex-direction: column;
+  }
+}
