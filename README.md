@@ -4,6 +4,17 @@ A complete full-stack web application featuring a modern React frontend and a se
 
 ---
 
+## 🎥 System Walkthrough & Demo Video
+
+Watch the full end-to-end system demonstration covering authentication, the clinical RAG assistant, real-time telemetry logging, and the benchmark dashboard:
+
+* **Watch on Google Drive:** [▶️ Open Depremune Demo Video](https://drive.google.com/file/d/1ge6xFHLofWMrVzg5VPyOLOI6QskYtqqw/view?usp=sharing)
+
+> *Note: If watching locally, the recording is located at `demoVideo/Depremune Demo.mp4`.*
+
+---
+
+
 ## 📸 Application Previews & Workflows
 
 ### 1. User Authentication Flow
@@ -19,6 +30,14 @@ A complete full-stack web application featuring a modern React frontend and a se
 | Account Created (Sign-Up Success) | Clinical Workspace Access Granted |
 | :---: | :---: |
 | ![Account Created](screenshots/account-created.png) | ![Access Granted](screenshots/access-granted.png) |
+
+---
+
+### 3. Clinical Intelligence & Analytics
+
+| Evaluation & Benchmark Dashboard | Real-Time AI Research Chat |
+| :---: | :---: |
+| ![Dashboard](screenshots/Dashboard.png) | ![Real Live Chat](screenshots/Real%20live%20chat.png) |
 
 ---
 
