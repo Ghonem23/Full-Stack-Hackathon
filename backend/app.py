@@ -1,20 +1,22 @@
-from flask import Flask, request, jsonify
+import os
+import sys
+import time
+from datetime import datetime, timedelta, timezone
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
-    jwt_required,
     get_jwt_identity,
+    jwt_required,
 )
-from models import db, User, QueryLog
-from datetime import timedelta, datetime, timezone
-import time
+from models import QueryLog, User, db
 
 # --- RAG PIPELINE IMPORT / FALLBACK ---
 try:
     from rag import query_rag
 except ImportError:
-    # Safe fallback if rag.py is still being finalized by your team
+    # Safe fallback if rag.py is still being finalized
     def query_rag(prompt: str, mode: str = "Research"):
         return {
             "answer": (
@@ -46,12 +48,17 @@ except ImportError:
 # --- APPLICATION CONFIGURATION ---
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///hackathon.db"
+# Serverless environment-safe SQLite database path configuration
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/hackathon.db"
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///hackathon.db")
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JWT_SECRET_KEY"] = "super-secret-hackathon-jwt-key"
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "super-secret-hackathon-jwt-key")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=7)
 
-# Enable CORS for all routes (Vite frontend on 5173 / localhost)
+# Enable CORS for all routes
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 db.init_app(app)
@@ -210,7 +217,6 @@ def dashboard():
         return jsonify({}), 200
 
     try:
-        # Using db.session.query() avoids conflict with QueryLog's 'query' column name
         total_queries = db.session.query(QueryLog).count()
         recent_logs = (
             db.session.query(QueryLog)
