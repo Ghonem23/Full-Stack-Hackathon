@@ -8,6 +8,8 @@ A complete full-stack web application featuring a modern React frontend and a se
 
 Watch the full end-to-end system demonstration covering authentication, the clinical RAG assistant, real-time telemetry logging, and the benchmark dashboard:
 
+* 🌐 **Live Demo:** [frontend-sepia-six-31.vercel.app](https://frontend-sepia-six-31.vercel.app)
+
 * **Watch on Google Drive:** [▶️ Open Depremune Demo Video](https://drive.google.com/file/d/1ge6xFHLofWMrVzg5VPyOLOI6QskYtqqw/view?usp=sharing)
 
 > *Note: If watching locally, the recording is located at `demoVideo/Depremune Demo.mp4`.*
