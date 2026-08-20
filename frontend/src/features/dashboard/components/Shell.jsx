@@ -32,7 +32,7 @@ export function Sidebar({ active, onNavigate, onOpenChat }) {
         <span className="dsh-brand-mark">
           <Activity size={16} strokeWidth={2.5} />
         </span>
-        <span className="dsh-brand-word">Model Name</span>
+        <span className="dsh-brand-word">Depremune</span>
       </div>
 
       <ul className="dsh-nav">

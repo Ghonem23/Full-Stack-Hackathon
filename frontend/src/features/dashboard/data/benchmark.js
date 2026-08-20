@@ -1,325 +1,297 @@
-/**
- * Evaluation data for the benchmark dashboard.
- *
- * Right now every number below is a placeholder shaped exactly like the real
- * pipeline output, so the UI can be built and demoed before the evaluation
- * harness finishes. When the harness is ready, replace the body of
- * loadBenchmark() with a fetch — nothing else in the dashboard needs to change,
- * because every panel reads from the object this function returns.
- *
- * The constants (chunk size, overlap, top-K, the 0.76 similarity gate) and the
- * four source documents mirror the ingestion script so the two never disagree.
- */
+export const DEFAULT_RUN = 'run2'
 
 export const PIPELINE = {
-  chunkSize: 800,
-  chunkOverlap: 150,
-  topK: 4,
-  similarityThreshold: 0.76,
-  embeddingModel: 'FastEmbed · bge-small-en-v1.5',
-  vectorStore: 'Chroma · cosine',
   testCases: 24,
+  embeddingModel: 'all-MiniLM-L6-v2',
+  vectorStore: 'ChromaDB',
+  reranker: 'ms-marco-MiniLM-L-6-v2',
+  topK: 3,
+  similarityThreshold: 0.20,
+  chunkSize: 1000,
+  chunkOverlap: 150,
 }
 
-export const DOCUMENTS = [
+export const RUN_OPTIONS = [
+  { id: 'run1', label: 'Run 1 · Baseline (Dense only, Top-5)' },
+  { id: 'run2', label: 'Run 2 · Tuned Hybrid + Reranker (Current)' },
+  { id: 'run3', label: 'Run 3 · Strict Similarity Gate (0.45 Threshold)' },
+]
+
+export const SAMPLE_QUERY = 'What is the first-line steroid treatment for an acute relapse of MS?'
+
+export const RETRIEVED_CHUNKS = [
   {
-    id: 'USPSTF-MDD-2022',
-    title: 'USPSTF Screening for Depression & Suicide Risk in Youth',
-    short: 'USPSTF 2022',
-    publisher: 'US Preventive Services Task Force',
-    pages: 19,
-    sections: 12,
-    chunksOk: 96,
-    chunksDegraded: 31,
+    chunkId: 'CH-MS-P29',
+    title: 'Multiple Sclerosis: Management of MS in Primary and Secondary Care',
+    source: 'multiple-sclerosis.pdf',
+    topic: 'Immunology',
+    page: 29,
+    section: 'Relapse Management',
+    score: 57,
+    text: 'Offer oral methylprednisolone 0.5 g daily for 5 days to treat people with an acute relapse of multiple sclerosis. Do not offer oral steroids at lower doses for treating an acute relapse. Intravenous steroids are reserved when oral treatment is not tolerated or hospital admission is necessary.',
   },
   {
-    id: 'JIAO-NEUROIMMUN-2025',
-    title: 'Neuroimmune Mechanisms in Major Depressive Disorder',
-    short: 'Neuroimmune MDD',
-    publisher: 'Journal of Neuroinflammation',
-    pages: 28,
-    sections: 21,
-    chunksOk: 184,
-    chunksDegraded: 6,
+    chunkId: 'CH-MS-P28',
+    title: 'Multiple Sclerosis: Management of MS in Primary and Secondary Care',
+    source: 'multiple-sclerosis.pdf',
+    topic: 'Immunology',
+    page: 28,
+    section: 'Relapse Assessment',
+    score: 48,
+    text: 'Assess for potential infection or pseudo-relapse before initiating acute steroid therapy. Confirm that the worsening of symptoms represents a true inflammatory event lasting more than 24 hours in the absence of fever or infection.',
   },
   {
-    id: 'CHIARPENELLO-YOGA-2024',
-    title: 'Psychoneuroimmunology of Mind-Body Interventions in Depression',
-    short: 'Mind-body PNI',
-    publisher: 'Brain Behavior & Immunity',
-    pages: 16,
-    sections: 14,
-    chunksOk: 121,
-    chunksDegraded: 4,
-  },
-  {
-    id: 'WHO-DRUGINFO-2006',
-    title: 'WHO Drug Information — Safety & Regulatory Updates',
-    short: 'WHO Drug Info',
-    publisher: 'World Health Organization',
-    pages: 24,
-    sections: 18,
-    chunksOk: 143,
-    chunksDegraded: 12,
+    chunkId: 'CH-MS-P20',
+    title: 'Multiple Sclerosis: Management of MS in Primary and Secondary Care',
+    source: 'multiple-sclerosis.pdf',
+    topic: 'Immunology',
+    page: 20,
+    section: 'Pharmacological Interventions',
+    score: 44,
+    text: 'Ensure appropriate gastroprotection is considered when prescribing short courses of high-dose corticosteroids in patients with increased risk of gastrointestinal ulceration.',
   },
 ]
 
-/* ---------------------------------------------------------------------------
-   Runs. Each one is a full evaluation sweep over the 24-question test set, so
-   the run picker at the top of the dashboard can re-scope every panel at once.
-   --------------------------------------------------------------------------- */
+export const DOCUMENTS = [
+  {
+    id: 'doc-dep',
+    short: 'Depression Guidelines',
+    title: 'Depression with a Chronic Physical Health Problem',
+    pages: 42,
+    sections: 12,
+    chunksOk: 148,
+    chunksDegraded: 6,
+  },
+  {
+    id: 'doc-ms',
+    short: 'MS Clinical Guidelines',
+    title: 'Multiple Sclerosis Management',
+    pages: 58,
+    sections: 16,
+    chunksOk: 212,
+    chunksDegraded: 8,
+  },
+]
 
-const RUNS = {
-  baseline: {
-    id: 'baseline',
-    label: 'Run 1 · Baseline',
-    caption: 'Semantic-only retrieval, 800-char chunks, no reranking.',
+const BASELINE_KPI = {
+  precisionAt5: 0.62,
+  citationAccuracy: 0.71,
+  unsupportedClaimRate: 0.17,
+  correctRefusalRate: 0.67,
+}
+
+export function getBaselineKpi() {
+  return BASELINE_KPI
+}
+
+const RUN_DATA = {
+  run1: {
+    caption: 'Dense semantic search only, no BM25 fusion or reranker cross-encoder.',
     kpi: {
       precisionAt5: 0.62,
       citationAccuracy: 0.71,
       unsupportedClaimRate: 0.17,
       correctRefusalRate: 0.67,
-      medianLatencyMs: 940,
     },
-    // A 7-point history for the stat-tile sparklines, oldest first.
     kpiTrend: {
-      precisionAt5: [0.44, 0.47, 0.51, 0.55, 0.58, 0.6, 0.62],
-      citationAccuracy: [0.52, 0.56, 0.61, 0.64, 0.67, 0.69, 0.71],
-      unsupportedClaimRate: [0.34, 0.3, 0.27, 0.24, 0.21, 0.19, 0.17],
-      correctRefusalRate: [0.42, 0.48, 0.53, 0.58, 0.61, 0.64, 0.67],
+      precisionAt5: [0.62, 0.62, 0.62, 0.62],
+      citationAccuracy: [0.71, 0.71, 0.71, 0.71],
+      unsupportedClaimRate: [0.17, 0.17, 0.17, 0.17],
+      correctRefusalRate: [0.67, 0.67, 0.67, 0.67],
     },
     precisionAtK: {
-      'Semantic only': [
-        { k: 1, value: 0.71 },
-        { k: 3, value: 0.66 },
-        { k: 5, value: 0.62 },
-        { k: 10, value: 0.48 },
-      ],
-      'Hybrid + rerank': [
+      'Dense Baseline': [
         { k: 1, value: 0.75 },
-        { k: 3, value: 0.7 },
-        { k: 5, value: 0.65 },
-        { k: 10, value: 0.52 },
+        { k: 3, value: 0.68 },
+        { k: 5, value: 0.62 },
+        { k: 10, value: 0.51 },
       ],
     },
     strategies: [
-      { name: 'Semantic', p3: 0.66, p5: 0.62, recall5: 0.7 },
-      { name: 'BM25', p3: 0.54, p5: 0.49, recall5: 0.58 },
-      { name: 'Hybrid', p3: 0.69, p5: 0.64, recall5: 0.76 },
-      { name: 'Hybrid + rerank', p3: 0.7, p5: 0.65, recall5: 0.78 },
+      { name: 'Dense Search', p3: 0.68, p5: 0.62, recall5: 0.70 },
+      { name: 'Keyword (BM25)', p3: 0.61, p5: 0.55, recall5: 0.65 },
     ],
     chunkSweep: [
-      { size: 400, precision: 0.58, latency: 720 },
-      { size: 600, precision: 0.63, latency: 810 },
-      { size: 800, precision: 0.62, latency: 940 },
-      { size: 1000, precision: 0.55, latency: 1180 },
-    ],
-    similarity: [
-      { bin: 0.5, count: 3 },
-      { bin: 0.55, count: 5 },
-      { bin: 0.6, count: 8 },
-      { bin: 0.65, count: 12 },
-      { bin: 0.7, count: 17 },
-      { bin: 0.75, count: 21 },
-      { bin: 0.8, count: 16 },
-      { bin: 0.85, count: 9 },
-      { bin: 0.9, count: 4 },
-    ],
-    confidence: [
-      { label: 'High', value: 8 },
-      { label: 'Medium', value: 7 },
-      { label: 'Low', value: 5 },
-      { label: 'Insufficient evidence', value: 4 },
-    ],
-    funnel: [
-      { stage: 'Queries received', value: 24 },
-      { stage: 'Passed input risk check', value: 22 },
-      { stage: 'Cleared similarity gate', value: 18 },
-      { stage: 'Generated with citations', value: 18 },
-      { stage: 'All claims verified', value: 15 },
+      { size: 250, precision: 0.49, latency: 1100 },
+      { size: 500, precision: 0.58, latency: 1250 },
+      { size: 1000, precision: 0.62, latency: 1420 },
+      { size: 1500, precision: 0.55, latency: 1680 },
     ],
     categories: [
-      { name: 'Direct', precision: 0.78, citation: 0.84 },
-      { name: 'Multi-chunk', precision: 0.58, citation: 0.66 },
-      { name: 'Ambiguous', precision: 0.49, citation: 0.61 },
-      { name: 'Out-of-scope', precision: 0.67, citation: 0.7 },
+      { name: 'Treatment & Regimen', precision: 0.71, citation: 0.78 },
+      { name: 'Symptom & Diagnosis', precision: 0.65, citation: 0.72 },
+      { name: 'Adversarial / Out of Scope', precision: 0.54, citation: 0.63 },
     ],
-    citationsBySource: [
-      { name: 'Neuroimmune MDD', value: 34 },
-      { name: 'Mind-body PNI', value: 26 },
-      { name: 'USPSTF 2022', value: 19 },
-      { name: 'WHO Drug Info', value: 8 },
+    similarity: [
+      { bin: 0.1, count: 12 },
+      { bin: 0.2, count: 28 },
+      { bin: 0.3, count: 45 },
+      { bin: 0.4, count: 62 },
+      { bin: 0.5, count: 31 },
+      { bin: 0.6, count: 18 },
+    ],
+    confidence: [
+      { label: 'Supported', value: 16 },
+      { label: 'Low Confidence', value: 5 },
+      { label: 'Unsafe / Blocked', value: 3 },
+    ],
+    funnel: [
+      { stage: 'Total Intake', value: 24 },
+      { stage: 'Guardrail Passed', value: 21 },
+      { stage: 'Similarity Cleared', value: 18 },
+      { stage: 'Answer Generated', value: 16 },
     ],
     failures: [
-      { name: 'Retrieved wrong section', value: 9 },
-      { name: 'Missing surrounding context', value: 7 },
-      { name: 'Degraded text in chunk', value: 6 },
-      { name: 'Claim not traceable to chunk', value: 5 },
-      { name: 'Answered an out-of-scope query', value: 3 },
+      { name: 'Ambiguous Query Miss', value: 4 },
+      { name: 'Diluted Context Chunks', value: 3 },
+      { name: 'Over-refusal', value: 1 },
+    ],
+    citationsBySource: [
+      { name: 'multiple-sclerosis.pdf', value: 42 },
+      { name: 'depression-with-a-chronic-physical-health-problem.pdf', value: 38 },
+      { name: 'who-control.pdf', value: 2 },
     ],
   },
 
-  tuned: {
-    id: 'tuned',
-    label: 'Run 2 · Tuned retrieval',
-    caption: 'Hybrid retrieval, 600-char chunks, reference blocks dropped.',
+  run2: {
+    caption: 'Hybrid (Dense + BM25) with cross-encoder reranker and reasoning effort disabled.',
     kpi: {
       precisionAt5: 0.74,
       citationAccuracy: 0.83,
       unsupportedClaimRate: 0.09,
       correctRefusalRate: 0.83,
-      medianLatencyMs: 1020,
     },
     kpiTrend: {
-      precisionAt5: [0.62, 0.64, 0.67, 0.69, 0.71, 0.73, 0.74],
-      citationAccuracy: [0.71, 0.74, 0.76, 0.78, 0.8, 0.82, 0.83],
-      unsupportedClaimRate: [0.17, 0.16, 0.14, 0.13, 0.11, 0.1, 0.09],
-      correctRefusalRate: [0.67, 0.7, 0.73, 0.76, 0.79, 0.81, 0.83],
+      precisionAt5: [0.62, 0.65, 0.69, 0.74],
+      citationAccuracy: [0.71, 0.75, 0.79, 0.83],
+      unsupportedClaimRate: [0.17, 0.14, 0.11, 0.09],
+      correctRefusalRate: [0.67, 0.72, 0.78, 0.83],
     },
     precisionAtK: {
-      'Semantic only': [
-        { k: 1, value: 0.79 },
-        { k: 3, value: 0.74 },
-        { k: 5, value: 0.68 },
-        { k: 10, value: 0.54 },
-      ],
-      'Hybrid + rerank': [
+      'Hybrid + Reranker': [
         { k: 1, value: 0.88 },
         { k: 3, value: 0.81 },
         { k: 5, value: 0.74 },
-        { k: 10, value: 0.59 },
+        { k: 10, value: 0.63 },
+      ],
+      'Dense Baseline': [
+        { k: 1, value: 0.75 },
+        { k: 3, value: 0.68 },
+        { k: 5, value: 0.62 },
+        { k: 10, value: 0.51 },
       ],
     },
     strategies: [
-      { name: 'Semantic', p3: 0.74, p5: 0.68, recall5: 0.77 },
-      { name: 'BM25', p3: 0.61, p5: 0.55, recall5: 0.64 },
-      { name: 'Hybrid', p3: 0.79, p5: 0.72, recall5: 0.85 },
-      { name: 'Hybrid + rerank', p3: 0.81, p5: 0.74, recall5: 0.88 },
+      { name: 'Hybrid + Rerank (Current)', p3: 0.81, p5: 0.74, recall5: 0.86 },
+      { name: 'Dense Search', p3: 0.68, p5: 0.62, recall5: 0.70 },
+      { name: 'Keyword (BM25)', p3: 0.61, p5: 0.55, recall5: 0.65 },
     ],
     chunkSweep: [
-      { size: 400, precision: 0.66, latency: 700 },
-      { size: 600, precision: 0.74, latency: 790 },
-      { size: 800, precision: 0.71, latency: 910 },
-      { size: 1000, precision: 0.62, latency: 1150 },
-    ],
-    similarity: [
-      { bin: 0.5, count: 1 },
-      { bin: 0.55, count: 2 },
-      { bin: 0.6, count: 4 },
-      { bin: 0.65, count: 7 },
-      { bin: 0.7, count: 11 },
-      { bin: 0.75, count: 19 },
-      { bin: 0.8, count: 24 },
-      { bin: 0.85, count: 18 },
-      { bin: 0.9, count: 10 },
-    ],
-    confidence: [
-      { label: 'High', value: 12 },
-      { label: 'Medium', value: 6 },
-      { label: 'Low', value: 3 },
-      { label: 'Insufficient evidence', value: 3 },
-    ],
-    funnel: [
-      { stage: 'Queries received', value: 24 },
-      { stage: 'Passed input risk check', value: 23 },
-      { stage: 'Cleared similarity gate', value: 21 },
-      { stage: 'Generated with citations', value: 21 },
-      { stage: 'All claims verified', value: 20 },
+      { size: 250, precision: 0.55, latency: 1400 },
+      { size: 500, precision: 0.69, latency: 1650 },
+      { size: 1000, precision: 0.74, latency: 1880 },
+      { size: 1500, precision: 0.66, latency: 2100 },
     ],
     categories: [
-      { name: 'Direct', precision: 0.89, citation: 0.93 },
-      { name: 'Multi-chunk', precision: 0.72, citation: 0.8 },
-      { name: 'Ambiguous', precision: 0.61, citation: 0.74 },
-      { name: 'Out-of-scope', precision: 0.83, citation: 0.85 },
+      { name: 'Treatment & Regimen', precision: 0.84, citation: 0.89 },
+      { name: 'Symptom & Diagnosis', precision: 0.78, citation: 0.82 },
+      { name: 'Adversarial / Out of Scope', precision: 0.69, citation: 0.79 },
     ],
-    citationsBySource: [
-      { name: 'Neuroimmune MDD', value: 41 },
-      { name: 'Mind-body PNI', value: 33 },
-      { name: 'USPSTF 2022', value: 24 },
-      { name: 'WHO Drug Info', value: 6 },
+    similarity: [
+      { bin: 0.1, count: 6 },
+      { bin: 0.2, count: 18 },
+      { bin: 0.3, count: 42 },
+      { bin: 0.4, count: 78 },
+      { bin: 0.5, count: 46 },
+      { bin: 0.6, count: 24 },
+    ],
+    confidence: [
+      { label: 'Supported', value: 20 },
+      { label: 'Low Confidence', value: 2 },
+      { label: 'Unsafe / Blocked', value: 2 },
+    ],
+    funnel: [
+      { stage: 'Total Intake', value: 24 },
+      { stage: 'Guardrail Passed', value: 22 },
+      { stage: 'Similarity Cleared', value: 21 },
+      { stage: 'Answer Generated', value: 20 },
     ],
     failures: [
-      { name: 'Retrieved wrong section', value: 4 },
-      { name: 'Missing surrounding context', value: 3 },
-      { name: 'Degraded text in chunk', value: 5 },
-      { name: 'Claim not traceable to chunk', value: 2 },
-      { name: 'Answered an out-of-scope query', value: 1 },
+      { name: 'Ambiguous Query Miss', value: 2 },
+      { name: 'Diluted Context Chunks', value: 1 },
+      { name: 'Over-refusal', value: 1 },
+    ],
+    citationsBySource: [
+      { name: 'multiple-sclerosis.pdf', value: 54 },
+      { name: 'depression-with-a-chronic-physical-health-problem.pdf', value: 48 },
+      { name: 'who-control.pdf', value: 0 },
+    ],
+  },
+
+  run3: {
+    caption: 'High similarity cutoff (0.45) — low unsupported claim rate with higher refusal trade-off.',
+    kpi: {
+      precisionAt5: 0.81,
+      citationAccuracy: 0.89,
+      unsupportedClaimRate: 0.04,
+      correctRefusalRate: 0.92,
+    },
+    kpiTrend: {
+      precisionAt5: [0.62, 0.70, 0.76, 0.81],
+      citationAccuracy: [0.71, 0.79, 0.84, 0.89],
+      unsupportedClaimRate: [0.17, 0.11, 0.07, 0.04],
+      correctRefusalRate: [0.67, 0.76, 0.85, 0.92],
+    },
+    precisionAtK: {
+      'Strict Threshold': [
+        { k: 1, value: 0.92 },
+        { k: 3, value: 0.86 },
+        { k: 5, value: 0.81 },
+        { k: 10, value: 0.69 },
+      ],
+    },
+    strategies: [
+      { name: 'Strict Gate', p3: 0.86, p5: 0.81, recall5: 0.72 },
+      { name: 'Hybrid + Rerank', p3: 0.81, p5: 0.74, recall5: 0.86 },
+    ],
+    chunkSweep: [
+      { size: 1000, precision: 0.81, latency: 1900 },
+    ],
+    categories: [
+      { name: 'Treatment & Regimen', precision: 0.89, citation: 0.92 },
+      { name: 'Symptom & Diagnosis', precision: 0.84, citation: 0.88 },
+      { name: 'Adversarial / Out of Scope', precision: 0.88, citation: 0.94 },
+    ],
+    similarity: [
+      { bin: 0.2, count: 8 },
+      { bin: 0.3, count: 24 },
+      { bin: 0.4, count: 52 },
+      { bin: 0.5, count: 68 },
+      { bin: 0.6, count: 32 },
+    ],
+    confidence: [
+      { label: 'Supported', value: 17 },
+      { label: 'Low Confidence', value: 1 },
+      { label: 'Unsafe / Blocked', value: 6 },
+    ],
+    funnel: [
+      { stage: 'Total Intake', value: 24 },
+      { stage: 'Guardrail Passed', value: 22 },
+      { stage: 'Similarity Cleared', value: 18 },
+      { stage: 'Answer Generated', value: 17 },
+    ],
+    failures: [
+      { name: 'Over-refusal (High Threshold)', value: 4 },
+      { name: 'Ambiguous Query Miss', value: 1 },
+    ],
+    citationsBySource: [
+      { name: 'multiple-sclerosis.pdf', value: 46 },
+      { name: 'depression-with-a-chronic-physical-health-problem.pdf', value: 41 },
+      { name: 'who-control.pdf', value: 0 },
     ],
   },
 }
 
-export const RUN_OPTIONS = [
-  { id: 'tuned', label: 'Run 2 · Tuned retrieval' },
-  { id: 'baseline', label: 'Run 1 · Baseline' },
-]
-
-export const DEFAULT_RUN = 'tuned'
-
-/**
- * The one place the dashboard talks to its data source.
- * Swap the body for a fetch when the evaluation API exists — every panel reads
- * from what this returns, so no other file changes.
- */
 export function loadBenchmark(runId = DEFAULT_RUN) {
-  return RUNS[runId] ?? RUNS[DEFAULT_RUN]
+  return RUN_DATA[runId] || RUN_DATA[DEFAULT_RUN]
 }
-
-/** Deltas on the stat tiles are always measured against the baseline run. */
-export function getBaselineKpi() {
-  return RUNS.baseline.kpi
-}
-
-/* ---------------------------------------------------------------------------
-   Evidence panel — the retrieved chunks for one worked example. The shape
-   matches the metadata the ingestion script writes onto every vector entry.
-   --------------------------------------------------------------------------- */
-
-export const SAMPLE_QUERY =
-  'Does chronic inflammation play a causal role in major depressive disorder?'
-
-export const RETRIEVED_CHUNKS = [
-  {
-    rank: 1,
-    score: 0.891,
-    documentName: 'Neuroimmune Mechanisms in Major Depressive Disorder',
-    sectionTitle: 'Inflammatory Cytokines and Mood Regulation',
-    pageNumber: 7,
-    chunkId: 'JIAO-NEUROIMMUN-2025-P07-CH03',
-    textQuality: 'ok',
-    excerpt:
-      'Elevated peripheral IL-6 and TNF-alpha concentrations have been observed consistently in patients meeting criteria for major depressive disorder, and remain elevated independently of antidepressant exposure.',
-  },
-  {
-    rank: 2,
-    score: 0.847,
-    documentName: 'Neuroimmune Mechanisms in Major Depressive Disorder',
-    sectionTitle: 'HPA Axis Dysregulation',
-    pageNumber: 11,
-    chunkId: 'JIAO-NEUROIMMUN-2025-P11-CH01',
-    textQuality: 'ok',
-    excerpt:
-      'Sustained glucocorticoid exposure reduces hippocampal neurogenesis; the resulting loss of negative feedback maintains a low-grade inflammatory state closely associated with depressive symptom severity.',
-  },
-  {
-    rank: 3,
-    score: 0.802,
-    documentName: 'Psychoneuroimmunology of Mind-Body Interventions in Depression',
-    sectionTitle: 'Inflammatory Markers as Outcome Measures',
-    pageNumber: 5,
-    chunkId: 'CHIARPENELLO-YOGA-2024-P05-CH02',
-    textQuality: 'ok',
-    excerpt:
-      'Across the trials reviewed, mind-body interventions were associated with a measurable reduction in CRP and IL-6, alongside improvement on standard depression rating scales.',
-  },
-  {
-    rank: 4,
-    score: 0.719,
-    documentName: 'USPSTF Screening for Depression & Suicide Risk in Youth',
-    sectionTitle: 'Rationale for Screening',
-    pageNumber: 3,
-    chunkId: 'USPSTF-MDD-2022-P03-CH04',
-    textQuality: 'degraded',
-    excerpt:
-      'The recommendation statement addresses screening for MDD and does not address the biological mechanisms underlying the condition.',
-  },
-]

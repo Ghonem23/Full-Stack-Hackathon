@@ -4,12 +4,13 @@ from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
+
 def get_utc_now():
     return datetime.now(timezone.utc)
 
+
 class User(db.Model):
     __tablename__ = "users"
-
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -36,12 +37,17 @@ class User(db.Model):
 
 class QueryLog(db.Model):
     __tablename__ = "query_logs"
-
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     query = db.Column(db.Text, nullable=False)
     latency_ms = db.Column(db.Integer, default=0)
     avg_score = db.Column(db.Float, default=90.0)
+
+    # NEW: tracks the evidenceQuality label returned by query_rag() —
+    # "Supported" / "Unsupported" / "Ambiguous" / "Unsafe" — so the
+    # dashboard can show real evidence-quality data instead of mock data.
+    evidence_quality = db.Column(db.String(20), default="Supported")
+
     created_at = db.Column(db.DateTime, default=get_utc_now)
 
     def to_dict(self):
@@ -51,5 +57,6 @@ class QueryLog(db.Model):
             "query": self.query,
             "latencyMs": self.latency_ms,
             "score": self.avg_score,
+            "evidenceQuality": self.evidence_quality,  # NEW
             "timestamp": self.created_at.isoformat() if self.created_at else None,
         }

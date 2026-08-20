@@ -7,10 +7,14 @@ import numpy as np
 import time
 import logging
 import pandas as pd
+from dotenv import load_dotenv
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from rank_bm25 import BM25Okapi
 import chromadb
+
+# Load environment variables from .env automatically
+load_dotenv()
 
 # Suppress Chroma telemetry
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
@@ -35,42 +39,24 @@ PDF_CONFIGS = [
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 150
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
-TOP_K = 4
+TOP_K = 3
 SIMILARITY_THRESHOLD = 0.20
 HYBRID_ALPHA = 0.5
 RERANK_CANDIDATE_K = 15
 
-# SECURITY: no hardcoded fallback. A real key was previously committed here
-# as a default value -- that key must be rotated in the Groq console. This
-# now fails fast if the env var isn't set, rather than silently falling
-# back to a credential that may be leaked/rotated/invalid.
-
-#######################API KEY IS HERE###########################
+# Security: Groq API key lookup from environment / .env
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
-    raise RuntimeError(
-        "GROQ_API_KEY environment variable is not set. Set it before "
-        "starting the app -- do not hardcode API keys in source."
+    print(
+        "[rag.py] WARNING: GROQ_API_KEY environment variable is not set. "
+        "The server will start, but any question sent to the RAG pipeline "
+        "will fail until this is set."
     )
 
 GROQ_MODEL = "qwen/qwen3.6-27b"
-
-# Reasoning control for qwen3-family models on Groq.
-# "none"    -> thinking mode disabled, model answers directly.
-# "default" -> thinking mode enabled (model reasons before answering).
-#
-# This is the fix for the over-refusal / empty-answer bug: with reasoning
-# left on (the implicit default when this param is omitted), the model
-# deliberates internally, can talk itself into an unwarranted refusal, and
-# -- worse -- can burn the entire max_tokens budget on reasoning tokens
-# before ever emitting a closing </think> tag, which truncates the
-# response mid-thought and leaves `content` effectively empty.
 GROQ_REASONING_EFFORT = "none"
-
-# Generation budget. With reasoning disabled this only needs to cover the
-# visible answer + citations, so this is comfortably sized without risking
-# truncation on longer multi-citation synthesis answers.
-GROQ_MAX_TOKENS = 1536
+GROQ_MAX_TOKENS = 300
 GROQ_TEMPERATURE = 0.2
 GROQ_TIMEOUT_SECONDS = 30
 GROQ_MAX_RETRIES = 3
@@ -159,28 +145,6 @@ GUIDELINE_DOMAIN_RE = re.compile(
     re.IGNORECASE,
 )
 
-CLASSIFICATION_ACTIONS = {
-    "adversarial": {"risk": "Critical", "continue": "No", "action": "Reject instruction"},
-    "emergency": {"risk": "Critical", "continue": "No", "action": "Redirect to emergency"},
-    "diagnosis_request": {"risk": "High", "continue": "No", "action": "Refuse diagnosis"},
-    "medication_dosage": {"risk": "High", "continue": "No", "action": "Refuse dosing"},
-    "patient_specific": {"risk": "High", "continue": "No", "action": "Refuse patient-specific"},
-    "ambiguous": {"risk": "Medium", "continue": "Clarify", "action": "Clarify"},
-    "out_of_domain": {"risk": "Medium", "continue": "No", "action": "Decline"},
-    "in_scope": {"risk": "Low", "continue": "Yes", "action": "Answer"},
-}
-
-_REFUSAL_MESSAGES = {
-    "adversarial": "I can't follow instructions embedded inside a query. I'll only answer using retrieved guideline evidence.",
-    "emergency": "This sounds like it may be a medical emergency. Please contact emergency services or go to the nearest emergency department immediately.",
-    "diagnosis_request": "I can't provide a diagnosis. This tool summarizes guideline content only — please see a qualified clinician for diagnosis.",
-    "medication_dosage": SAFETY_REFUSAL_TEXT,
-    "patient_specific": SAFETY_REFUSAL_TEXT,
-    "out_of_domain": "This question is outside the scope of the loaded clinical guidelines.",
-}
-
-_CLARIFY_MESSAGE = "Could you clarify what you'd like to know — for example, which condition, and whether you're asking about the general guideline recommendation rather than a specific personal situation?"
-
 SECTION_HEADING_PATTERN = re.compile(
     r"^\s*(\d+(\.\d+)*[\.\)]?\s*)?"
     r"(overview|who is it for\??|context|"
@@ -207,25 +171,21 @@ SYSTEM_PROMPT = (
     "Your objective is to read the provided CONTEXT excerpts and write a complete, clear, and "
     "informative answer to the user's QUESTION, in your own words.\n\n"
     "FORMAT -- follow this exactly:\n"
-    "- Write in flowing paragraph prose, the way a clinician would explain this to a colleague. "
-    "2-4 short paragraphs is typical.\n"
+    "- Write EXACTLY 2 to 3 sentences total. No more, no less than that range.\n"
     "- Do NOT use bullet points, numbered lists, or headers of any kind.\n"
     "- Do NOT use markdown bold/italics (no ** or _). Plain sentences only.\n"
     "- Do NOT restate or mirror the excerpts' own headings/structure (e.g. 'Key Considerations:', "
     "'Dose Restrictions:'). Weave that content into ordinary sentences instead.\n"
-    "- Lead with the direct, concrete answer to the question in the first sentence or two, then "
-    "add supporting detail and caveats afterward.\n\n"
+    "- Lead with the direct, concrete answer to the question in the first sentence, then use the "
+    "remaining 1-2 sentences for the single most important caveat or follow-up detail only. Leave "
+    "out anything secondary -- there is no room for it.\n\n"
     "SYNTHESIS:\n"
     "- Do not copy excerpt sentences verbatim; explain the recommendations in your own words.\n"
     "- Combine related facts from different excerpts into single sentences where it reads "
     "naturally, rather than presenting one citation per fragment.\n\n"
     "CITATIONS:\n"
-    "- Cite every distinct clinical fact using this exact format: "
-    "[source | section | page | chunk_id].\n"
-    "- Place one citation at the end of the sentence that contains the fact, not after every "
-    "clause. If several consecutive sentences draw from the same excerpt, a single citation at "
-    "the end of that passage is enough -- do not repeat the same citation multiple times in a "
-    "row.\n\n"
+    "- Do NOT include any citation markers, brackets, numbers, or source references of any kind "
+    "in the answer. Write plain prose only -- no [1], no (source), nothing bracketed.\n\n"
     "SCOPE:\n"
     "- If the question asks about a specific drug, dose, or duration and the context contains it, "
     "state it plainly and cite it -- this is reporting what the guideline says, not prescribing "
@@ -453,17 +413,6 @@ def retrieve(query, top_k=TOP_K, similarity_threshold=SIMILARITY_THRESHOLD):
 
 # --- GENERATION ---
 def clean_generated_answer(answer):
-    """
-    Strip stray <think>...</think> content if it ever slips through despite
-    reasoning being disabled at the API level (defense in depth).
-
-    Returns (cleaned_text, was_truncated_mid_think). The truncated flag lets
-    the caller distinguish "model produced no real answer because the
-    response got cut off mid-reasoning" from "model produced a genuinely
-    empty answer" -- the old version conflated these, which meant a
-    truncated response silently became an empty string and looked like a
-    clean failure with no diagnostic signal.
-    """
     if not answer:
         return "", False
 
@@ -474,8 +423,6 @@ def clean_generated_answer(answer):
         if "</think>" in answer:
             answer = answer.split("</think>", 1)[1].strip()
         else:
-            # Reasoning started but never closed -- almost certainly ran out
-            # of max_tokens mid-thought. There is no usable answer here.
             truncated_mid_think = True
             answer = ""
 
@@ -483,29 +430,52 @@ def clean_generated_answer(answer):
     return answer, truncated_mid_think
 
 
-def fix_broken_citations(answer_text, retrieved_chunks):
-    chunks_by_id = {c["chunk_id"]: c for c in retrieved_chunks}
-    chunks_by_suffix = {c["chunk_id"].split("::")[-1]: c for c in retrieved_chunks}
-    pattern = r"[\[【]([^\|\]】]+)\s*\|\s*([^\|\]】]+)\s*\|\s*([^\|\]】]+)\s*\|\s*([^\]】]+)[\]】]"
+CITATION_MARKER_RE = re.compile(r"(\[\s*\d+\s*\])+")
 
-    def repl(m):
-        src, sec, pg, cid = [x.strip() for x in m.groups()]
-        if cid == "chunk_id":
-            return ""
-        real = chunks_by_id.get(cid) or chunks_by_suffix.get(cid.split("::")[-1])
-        if real is None:
-            return m.group(0)
-        return f"[{real['source']} | {real.get('section', 'Overview')} | {real['page']} | {real['chunk_id']}]"
 
-    return re.sub(pattern, repl, answer_text)
+def strip_citations(answer_text):
+    text = CITATION_MARKER_RE.sub("", answer_text)
+    text = re.sub(r"\s+([.,;:!?])", r"\1", text)
+    text = re.sub(r"[ \t]{2,}", " ", text)
+    return text.strip()
+
+
+SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
+MAX_ANSWER_SENTENCES = 3
+
+
+def enforce_sentence_limit(answer_text, max_sentences=MAX_ANSWER_SENTENCES):
+    sentences = SENTENCE_SPLIT_RE.split(answer_text.strip())
+    sentences = [s for s in sentences if s]
+    if len(sentences) <= max_sentences:
+        return answer_text.strip()
+    return " ".join(sentences[:max_sentences]).strip()
+
+
+def classify_evidence_quality(risk_category, retrieved_chunks=None):
+    if risk_category in ("adversarial", "emergency", "diagnosis_request",
+                          "medication_dosage", "patient_specific"):
+        return "Unsafe"
+    if risk_category == "ambiguous":
+        return "Ambiguous"
+    if not retrieved_chunks:
+        return "Unsupported"
+    return "Supported"
 
 
 def generate_answer(query, retrieved_chunks, max_retries=GROQ_MAX_RETRIES):
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "GROQ_API_KEY environment variable is not set. Set it before "
+            "sending questions -- do not hardcode API keys in source."
+        )
+
     blocks = []
     for i, c in enumerate(retrieved_chunks, start=1):
         sec = c.get("section") or "Overview"
         blocks.append(
-            f"[{i}] source={c['source']} | section={sec} | page={c['page']} | chunk_id={c['chunk_id']}\n{c['text']}"
+            f"[{i}] source={c['source']} | section={sec} | page={c['page']}\n{c['text']}"
         )
     context_block = "\n\n".join(blocks)
 
@@ -515,9 +485,8 @@ def generate_answer(query, retrieved_chunks, max_retries=GROQ_MAX_RETRIES):
         "INSTRUCTION:\n"
         "Synthesize the relevant clinical facts from the context above into a helpful, complete response answering the question. "
         "Write it as flowing paragraphs, not bullet points or headers -- explain the key treatments, regimens, and "
-        "considerations the way you'd talk a colleague through it. Include the citation tag "
-        "[source | section | page | chunk_id] at the end of the sentence containing each fact, without repeating the "
-        "same citation back-to-back."
+        "considerations the way you'd talk a colleague through it. Do NOT include any citation markers, bracketed "
+        "numbers, or source references in the text -- plain prose only."
     )
 
     for attempt in range(max_retries):
@@ -526,7 +495,7 @@ def generate_answer(query, retrieved_chunks, max_retries=GROQ_MAX_RETRIES):
             response = requests.post(
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers={
-                    "Authorization": f"Bearer {GROQ_API_KEY}",
+                    "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
                 },
                 json={
@@ -537,11 +506,6 @@ def generate_answer(query, retrieved_chunks, max_retries=GROQ_MAX_RETRIES):
                     ],
                     "temperature": GROQ_TEMPERATURE,
                     "max_tokens": GROQ_MAX_TOKENS,
-                    # This is the core fix: disable Qwen3.6's thinking mode.
-                    # Without it, the model reasons before answering and can
-                    # (a) talk itself into an unwarranted refusal, or
-                    # (b) consume the entire token budget on reasoning and
-                    #     truncate before emitting a visible answer.
                     "reasoning_effort": GROQ_REASONING_EFFORT,
                 },
                 timeout=GROQ_TIMEOUT_SECONDS,
@@ -612,21 +576,25 @@ def query_rag(prompt: str, mode: str = "Research") -> dict:
         return {
             "answer": "I cannot follow prompt overrides or instructions inside user queries. I only synthesize evidence from the provided medical guidelines.",
             "sources": [],
+            "evidenceQuality": classify_evidence_quality(category),
         }
     if category == "emergency":
         return {
             "answer": "This sounds like a potential medical emergency. Please contact emergency medical services or visit the nearest emergency department immediately.",
             "sources": [],
+            "evidenceQuality": classify_evidence_quality(category),
         }
     if category in ("diagnosis_request", "medication_dosage", "patient_specific"):
         return {
             "answer": SAFETY_REFUSAL_TEXT,
             "sources": [],
+            "evidenceQuality": classify_evidence_quality(category),
         }
     if category == "ambiguous":
         return {
             "answer": "Could you please clarify your question? For example, specify whether you are asking about Multiple Sclerosis or Depression clinical guidelines.",
             "sources": [],
+            "evidenceQuality": classify_evidence_quality(category),
         }
 
     # Step 1: Retrieval
@@ -635,17 +603,20 @@ def query_rag(prompt: str, mode: str = "Research") -> dict:
         return {
             "answer": NO_ANSWER_TEXT,
             "sources": [],
+            "evidenceQuality": classify_evidence_quality(category, retrieved),
         }
 
     # Step 2: Generation
     raw_answer = generate_answer(prompt, retrieved)
-    answer = fix_broken_citations(raw_answer, retrieved).strip()
+    answer = strip_citations(raw_answer).strip()
+    answer = enforce_sentence_limit(answer)
 
     if answer not in (SAFETY_REFUSAL_TEXT, NO_ANSWER_TEXT, GENERATION_FAILURE_TEXT):
         answer = f"{answer}\n\n{CLINICAL_SAFETY_DISCLAIMER}"
 
     formatted_sources = [
         {
+            "index": i + 1,
             "title": c["source"].replace("-", " ").replace(".pdf", "").title(),
             "detail": f"{c['topic']} Guideline • Page {c['page']}",
             "section": c.get("section") or "Overview",
@@ -653,10 +624,11 @@ def query_rag(prompt: str, mode: str = "Research") -> dict:
             "chunkId": c["chunk_id"].split("::")[-1].upper(),
             "score": int(round(c["similarity"] * 100)),
         }
-        for c in retrieved
+        for i, c in enumerate(retrieved)
     ]
 
     return {
         "answer": answer,
         "sources": formatted_sources,
+        "evidenceQuality": classify_evidence_quality(category, retrieved),
     }

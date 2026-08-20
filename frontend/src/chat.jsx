@@ -429,7 +429,7 @@ export default function App({ onNavigate }) {
     {
       role: "assistant",
       text:
-        "Hi! I'm Model Name AI. I can help you explore the relationship between mental health, immunity, and the latest medical evidence. You can ask me a question or upload a research PDF and I'll search within it.",
+        "Hi! I'm Depremune AI. I can help you explore the relationship between mental health, immunity, and the latest medical evidence. You can ask me a question or upload a research PDF and I'll search within it.",
       sources: [
   {
     title: "Neuroimmune interactions in depression",

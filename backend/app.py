@@ -156,15 +156,16 @@ def chat():
 
     try:
         t0 = time.time()
-        
+
         # Invoke RAG pipeline
         rag_output = query_rag(prompt=question, mode=mode)
-        
+
         latency_ms = int((time.time() - t0) * 1000)
 
         answer = rag_output.get("answer", "")
         sources = rag_output.get("sources", [])
-        
+        evidence_quality = rag_output.get("evidenceQuality", "Supported")
+
         # Extract top score for logging
         top_score = 90.0
         if sources and isinstance(sources, list) and len(sources) > 0:
@@ -177,7 +178,8 @@ def chat():
             query=question,
             latency_ms=latency_ms,
             avg_score=top_score,
-            created_at=datetime.now(timezone.utc)
+            evidence_quality=evidence_quality,
+            created_at=datetime.now(timezone.utc),
         )
         db.session.add(query_log)
         db.session.commit()
@@ -186,16 +188,17 @@ def chat():
             "success": True,
             "answer": answer,
             "sources": sources,
+            "evidenceQuality": evidence_quality,
             "latencyMs": latency_ms,
             "fileName": file_name,
-            "mode": mode
+            "mode": mode,
         }), 200
 
     except Exception as e:
         app.logger.error(f"RAG execution error: {str(e)}")
         return jsonify({
             "success": False,
-            "error": f"Intelligence server error: {str(e)}"
+            "error": f"Intelligence server error: {str(e)}",
         }), 500
 
 
@@ -207,9 +210,11 @@ def dashboard():
         return jsonify({}), 200
 
     try:
-        total_queries = QueryLog.query.count()
+        # Using db.session.query() avoids conflict with QueryLog's 'query' column name
+        total_queries = db.session.query(QueryLog).count()
         recent_logs = (
-            QueryLog.query.order_by(QueryLog.created_at.desc())
+            db.session.query(QueryLog)
+            .order_by(QueryLog.created_at.desc())
             .limit(20)
             .all()
         )
@@ -219,7 +224,7 @@ def dashboard():
             if recent_logs
             else 0
         )
-        
+
         avg_confidence = (
             round(sum(log.avg_score for log in recent_logs) / len(recent_logs), 1)
             if recent_logs
@@ -240,6 +245,7 @@ def dashboard():
                     "query": log.query,
                     "latencyMs": log.latency_ms,
                     "score": log.avg_score,
+                    "evidenceQuality": log.evidence_quality,
                     "timestamp": log.created_at.isoformat() if log.created_at else None,
                 }
                 for log in recent_logs

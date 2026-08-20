@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import '@/features/dashboard/dashboard.css'
 
@@ -13,6 +13,7 @@ import {
   getBaselineKpi,
   loadBenchmark,
 } from '@/features/dashboard/data/benchmark'
+import { API_BASE_URL } from '@/config'
 
 import ChartCard from '@/features/dashboard/charts/ChartCard'
 import LineChart from '@/features/dashboard/charts/LineChart'
@@ -33,12 +34,44 @@ import { clearSession } from '@/features/dashboard/session'
 
 const pct = (value, digits = 0) => `${(value * 100).toFixed(digits)}%`
 
+// Base URL configured to fallback to localhost:5000 if not specified
+const API_BASE = API_BASE_URL ? API_BASE_URL.replace(/\/api$/, '') : 'http://localhost:5000'
+
 export default function DashboardPage({ onNavigate }) {
   const [runId, setRunId] = useState(DEFAULT_RUN)
   const [active, setActive] = useState('overview')
 
   const run = useMemo(() => loadBenchmark(runId), [runId])
   const baseline = getBaselineKpi()
+
+  // Live traffic pulled from /api/dashboard endpoint, polled every 5 seconds
+  const [live, setLive] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchLive = async () => {
+      try {
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token')
+        const res = await fetch(`${API_BASE}/api/dashboard`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
+        const data = await res.json()
+        if (!cancelled && data.success) {
+          setLive(data)
+        }
+      } catch {
+        // Backend not reachable — retain previous state
+      }
+    }
+
+    fetchLive()
+    const interval = setInterval(fetchLive, 5000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [])
 
   const scrollTo = (id) => {
     setActive(id)
@@ -65,6 +98,7 @@ export default function DashboardPage({ onNavigate }) {
 
         <div className="dsh-scroll">
           <Overview run={run} baseline={baseline} />
+          <LiveActivity live={live} />
           <CohortSection />
           <Retrieval run={run} />
           <Safety run={run} />
@@ -83,8 +117,7 @@ export default function DashboardPage({ onNavigate }) {
 }
 
 /* ============================================================
-   1 — Overview: the headline number and the three metrics the
-   brief names as the empirical evaluation dashboard.
+   1 — Overview: Empirical evaluation headline metrics
    ============================================================ */
 
 function Overview({ run, baseline }) {
@@ -99,8 +132,6 @@ function Overview({ run, baseline }) {
       />
 
       <div className="dsh-kpi-grid">
-        {/* Exactly one hero figure per view — Precision@5 is the number the
-            whole retrieval pipeline is tuned against. */}
         <KpiTile
           hero
           label="Retrieval Precision@5"
@@ -138,6 +169,129 @@ function Overview({ run, baseline }) {
           trend={kpiTrend.correctRefusalRate}
           caption="Out-of-scope questions the system declined instead of answering."
         />
+      </div>
+    </section>
+  )
+}
+
+/* ============================================================
+   1b — Live Activity: Real chat questions via /api/dashboard
+   ============================================================ */
+
+function LiveActivity({ live }) {
+  const summary = live?.summary || { totalQueries: 0, avgLatencyMs: 0, avgConfidence: 0 }
+  const recentQueries = live?.recentQueries || []
+
+  const getQualityBadgeStyle = (quality) => {
+    switch (quality) {
+      case 'Supported':
+        return { background: '#E0F2FE', color: '#0369A1', border: '1px solid #BAE6FD' }
+      case 'Unsafe':
+        return { background: '#FEE2E2', color: '#B91C1C', border: '1px solid #FECACA' }
+      case 'Ambiguous':
+        return { background: '#FEF3C7', color: '#B45309', border: '1px solid #FDE68A' }
+      default:
+        return { background: '#F3F4F6', color: '#4B5563', border: '1px solid #E5E7EB' }
+    }
+  }
+
+  return (
+    <section id="dsh-live" className="dsh-section">
+      <SectionHead
+        eyebrow="Live"
+        title="Real usage"
+        note="Updates every 5 seconds from actual chat traffic."
+      />
+
+      <div className="dsh-kpi-grid">
+        <KpiTile
+          label="Total queries"
+          value={summary.totalQueries}
+          format={(v) => String(v)}
+          delta={null}
+          caption="Questions asked in the chat so far."
+        />
+        <KpiTile
+          label="Avg latency"
+          value={summary.avgLatencyMs}
+          format={(v) => `${v} ms`}
+          delta={null}
+          caption="Average response time across recent queries."
+        />
+        <KpiTile
+          label="Avg confidence"
+          value={summary.avgConfidence / 100}
+          format={(v) => pct(v)}
+          delta={null}
+          caption="Average top-source similarity score."
+        />
+      </div>
+
+      <div
+        style={{
+          marginTop: '1.25rem',
+          background: '#ffffff',
+          borderRadius: '12px',
+          border: '1px solid #E5E7EB',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+            <thead>
+              <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #E5E7EB', color: '#4B5563', fontWeight: 600 }}>
+                <th style={{ padding: '0.75rem 1rem', width: '55%' }}>Query</th>
+                <th style={{ padding: '0.75rem 1rem', width: '15%' }}>Match Score</th>
+                <th style={{ padding: '0.75rem 1rem', width: '15%' }}>Latency</th>
+                <th style={{ padding: '0.75rem 1rem', width: '15%' }}>Evidence Quality</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentQueries.length > 0 ? (
+                recentQueries.map((q, idx) => (
+                  <tr
+                    key={q.id}
+                    style={{
+                      borderBottom: idx === recentQueries.length - 1 ? 'none' : '1px solid #F3F4F6',
+                      transition: 'background-color 0.15s ease',
+                    }}
+                  >
+                    <td style={{ padding: '0.75rem 1rem', color: '#111827', fontWeight: 500 }}>
+                      {q.query}
+                    </td>
+                    <td style={{ padding: '0.75rem 1rem', color: '#374151', fontVariantNumeric: 'tabular-nums' }}>
+                      {q.score}%
+                    </td>
+                    <td style={{ padding: '0.75rem 1rem', color: '#6B7280', fontVariantNumeric: 'tabular-nums' }}>
+                      {q.latencyMs} ms
+                    </td>
+                    <td style={{ padding: '0.75rem 1rem' }}>
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          padding: '0.2rem 0.6rem',
+                          borderRadius: '9999px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          ...getQualityBadgeStyle(q.evidenceQuality),
+                        }}
+                      >
+                        {q.evidenceQuality || 'Supported'}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" style={{ padding: '1.5rem', textAlign: 'center', color: '#9CA3AF' }}>
+                    No live queries logged yet. Questions submitted in the chat will appear here automatically.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   )
@@ -217,9 +371,6 @@ function Retrieval({ run }) {
           />
         </ChartCard>
 
-        {/* Precision and latency are different units, so they get two plots
-            rather than two y-axes on one. A shared x makes them read as a
-            pair without inventing a correlation between the scales. */}
         <ChartCard
           title="Chunk size sweep"
           subtitle="Precision peaks mid-range: small chunks lose context, large ones dilute it."
@@ -465,8 +616,6 @@ function Corpus({ run }) {
    ============================================================ */
 
 function Evidence() {
-  // Mirrors whatever window the live plot is currently showing, so the table
-  // view of that card is never a stale snapshot.
   const [samples, setSamples] = useState([])
 
   return (

@@ -113,7 +113,7 @@ function Logo({ variant = "light" }) {
       <span className="nm-logo-icon">
         <Activity size={16} />
       </span>
-      <span className="nm-logo-word">Model Name</span>
+      <span className="nm-logo-word">Depremune</span>
     </div>
   );
 }
