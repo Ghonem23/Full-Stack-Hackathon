@@ -4,4 +4,4 @@
  * The browser tab title lives in index.html and needs the same edit.
  */
 export const MODEL_NAME = 'Depremune'
-export const API_BASE_URL = 'http://localhost:5000/api'
+export const API_BASE_URL = '/api'

@@ -171,7 +171,7 @@ function LoginForm({ onForgotPassword, onSuccess, onNavigate }) {
     setStatus("loading");
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -380,7 +380,7 @@ function ForgotPassword({ onBack }) {
     setStatus("loading");
 
     try {
-      await fetch("http://127.0.0.1:5000/api/auth/forgot-password", {
+      await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),

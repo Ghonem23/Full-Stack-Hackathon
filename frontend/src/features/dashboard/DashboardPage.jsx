@@ -35,7 +35,7 @@ import { clearSession } from '@/features/dashboard/session'
 const pct = (value, digits = 0) => `${(value * 100).toFixed(digits)}%`
 
 // Base URL configured to fallback to localhost:5000 if not specified
-const API_BASE = API_BASE_URL ? API_BASE_URL.replace(/\/api$/, '') : 'http://localhost:5000'
+const API_BASE = API_BASE_URL ? API_BASE_URL.replace(/\/api$/, '') : ''
 
 export default function DashboardPage({ onNavigate }) {
   const [runId, setRunId] = useState(DEFAULT_RUN)
