@@ -53,18 +53,25 @@ Watch the full end-to-end system demonstration covering authentication, the clin
 
 ```text
 Full-Stack-Hackathon/
-├── FrontEnd/          # Consolidated React + Vite frontend application
+├── FrontEnd/
 │   ├── src/
-│   │   ├── components/  # UI components, AuthCard, etc.
-│   │   ├── features/    # Feature modules (signup validation & forms)
-│   │   ├── pages/       # Page components (SignUpPage)
-│   │   └── App.jsx      # Unified frontend workflow manager
-│   └── package.json
-└── backend/           # Flask REST API backend
-    ├── app.py         # Main entry point and API routes
-    ├── models.py      # SQLAlchemy User model & password hashing
-    ├── requirements.txt
-    └── instance/      # Auto-generated SQLite database storage
+│   │   ├── components/        # Shared UI components (AuthCard, buttons, layout)
+│   │   ├── features/
+│   │   │   ├── auth/          # Signup, login, and validation workflows
+│   │   │   └── dashboard/     # Benchmark metrics, cohort charts & telemetry
+│   │   ├── pages/             # View pages (SignUpPage, DashboardPage, Chat)
+│   │   ├── App.jsx            # Main app router & state manager
+│   │   └── main.jsx           # React DOM root entry
+│   ├── package.json
+│   └── vite.config.js
+├── backend/
+│   ├── app.py                 # REST API endpoints & live telemetry aggregator
+│   ├── rag.py                 # RAG pipeline, guardrails & Groq LLM integration
+│   ├── models.py              # SQLAlchemy database models (User & QueryLog)
+│   ├── requirements.txt       # Python dependency specifications
+│   └── instance/              # Auto-generated SQLite database (app.db)
+├── screenshots/               # UI preview images for documentation
+└── demoVideo/                 # Project walkthrough video recording
 ```
 
 ---
